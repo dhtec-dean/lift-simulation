@@ -80,28 +80,29 @@
 	  	{
 			liftAtFloor: 0, 
 			doorsOpen: true, 
-			noOfPeopleInLift: 1,
+			noOfPeopleInLift: [{goingTo: 1}],
 			direction: "UP"
 	  	},
 	  	{
-			liftAtFloor: 0, 
+			liftAtFloor: 2, 
 			doorsOpen: true, 
-			noOfPeopleInLift: 1,
-			direction: "UP"
+			noOfPeopleInLift: [{goingTo: 0}],
+			direction: "DOWN"
 	  	}
 		  ],
 		  floors: [
-			{peopleWaiting: 0},
-			{peopleWaiting: 2},
-			{peopleWaiting: 5}
+			{peopleWaiting: []},
+			{peopleWaiting: [{goingTo: 0}]},
+			{peopleWaiting: [{goingTo: 1}, {goingTo: 2}]}
 		  ]
 	  };
 	  
 	  var Person = React.createClass({
 		  render: function() {
 			  var className = "person personPosition" + this.props.position;
+			  var goingTo = this.props.goingTo;
 			  return(
-				  <div className={className} /> 
+				  <div className={className} >{goingTo}</div> 
 			  );
 		  }	  	
 	  });
@@ -128,15 +129,15 @@
 	  
 	  var FloorSection = React.createClass({
 	    render: function() {
-			var peopleWaiting = new Array();
-			for(i=0; i<this.props.floor.peopleWaiting; i++){
-				peopleWaiting[i] = <Person position={i}/>
-			}
+			var people = this.props.peopleWaiting.map(function(person, position){
+				return <Person position={position} goingTo={person.goingTo} />
+			});
+			
 	    	return (
-				<div className="floorSection">
-						{peopleWaiting}
+ 				<div className="floorSection">
 					<CallButton />
 					<Lift />
+					{people}
 					{this.props.floorNumber}
 				</div>
 			);
@@ -146,10 +147,21 @@
 	  var Floor = React.createClass({
 	    render: function() {
 			var floorSections = new Array();
-			for(sectionNo=0; sectionNo<this.props.lifts.length; sectionNo++){
-				var floor = this.props.floor;
+			var noOfSectionsPerFloor = this.props.lifts.length;
+			var noOfPeopleWaiting = this.props.peopleWaiting.length;
+			var peopleWaitingPerSection = new Array();
+			var maxNoOfPeoplePerSection = 3;
+			for(sectionNo=0; sectionNo< noOfSectionsPerFloor; sectionNo++){
 				var floorNumber = this.props.floorNumber;
-				floorSections[sectionNo] = <FloorSection floor={floor} floorNumber={floorNumber}/>
+				var peopleWaiting = new Array();
+				var startTakingPeopleFrom = sectionNo * maxNoOfPeoplePerSection;
+				var takePeopleUntil = startTakingPeopleFrom + maxNoOfPeoplePerSection;
+				var peopleWaitingPosition = 0;
+				for(personAt=startTakingPeopleFrom; personAt<takePeopleUntil && personAt<noOfPeopleWaiting; personAt++){
+					peopleWaiting[peopleWaitingPosition] = this.props.peopleWaiting[personAt];
+					peopleWaitingPosition++;
+				}
+				floorSections[sectionNo] = <FloorSection peopleWaiting={peopleWaiting} floorNumber={floorNumber}/>
 			}
 	    	return (
 				<div className="floor">
@@ -164,7 +176,7 @@
 			var noOfFloors = this.props.buildingConfiguration.floors.length;
 			var lifts = this.props.buildingConfiguration.lifts;
 			var floors = this.props.buildingConfiguration.floors.map(function(floor, index){
-				return <Floor floor={floor} floorNumber={noOfFloors - index -1} lifts={lifts}/>
+				return <Floor peopleWaiting={floor.peopleWaiting} floorNumber={noOfFloors - index -1} lifts={lifts}/>
 			});
 			
 	      return (
