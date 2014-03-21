@@ -28,6 +28,25 @@
 		width:90px;
 		background-color:#A0A0A0;
 	}
+	div.liftDirectionIndicator
+	{
+		position:absolute;
+		bottom:102px;
+		left:180px;
+		width:15px;
+		height:15px;
+		background-color:#00A000;
+	}
+	div.currentFloorIndicator
+	{
+		position:absolute;
+		bottom:102px;
+		left:163px;
+		width:15px;
+		height:15px;
+		background-color:#00A000;
+	}
+	
 	div.callButton
 	{
 		position:absolute;
@@ -127,16 +146,39 @@
 		  }
 	  });
 	  
+	  var LiftDirectionIndicator = React.createClass({
+		  render: function() {
+			  var direction = "U";
+			  if(this.props.direction == "DOWN"){
+				  direction = "D";
+			  }
+			  return (
+				 <div className="liftDirectionIndicator">{direction}</div>
+			  );
+		  }
+	  });
+	  
+	  var CurrentFloorIndicator = React.createClass({
+		  render: function() {
+			  var currentFloor = this.props.currentFloor;
+			  return (
+				 <div className="currentFloorIndicator">{currentFloor}</div>
+			  );
+		  }
+	  });
+	  
 	  var FloorSection = React.createClass({
 	    render: function() {
 			var people = this.props.peopleWaiting.map(function(person, position){
 				return <Person position={position} goingTo={person.goingTo} />
 			});
-			
+			var lift = this.props.lift;
 	    	return (
  				<div className="floorSection">
 					<CallButton />
-					<Lift />
+					<LiftDirectionIndicator direction={lift.direction}/>
+					<CurrentFloorIndicator currentFloor={lift.liftAtFloor}/>
+					<Lift lift={lift} />
 					{people}
 					{this.props.floorNumber}
 				</div>
@@ -157,11 +199,12 @@
 				var startTakingPeopleFrom = sectionNo * maxNoOfPeoplePerSection;
 				var takePeopleUntil = startTakingPeopleFrom + maxNoOfPeoplePerSection;
 				var peopleWaitingPosition = 0;
+				var lift = this.props.lifts[sectionNo];
 				for(personAt=startTakingPeopleFrom; personAt<takePeopleUntil && personAt<noOfPeopleWaiting; personAt++){
 					peopleWaiting[peopleWaitingPosition] = this.props.peopleWaiting[personAt];
 					peopleWaitingPosition++;
 				}
-				floorSections[sectionNo] = <FloorSection peopleWaiting={peopleWaiting} floorNumber={floorNumber}/>
+				floorSections[sectionNo] = <FloorSection peopleWaiting={peopleWaiting} floorNumber={floorNumber} lift={lift}/>
 			}
 	    	return (
 				<div className="floor">
