@@ -6,13 +6,18 @@
     <script src="http://fb.me/JSXTransformer-0.9.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
     <style>
-	div.floor
+	div.floorSection
 	{
 		height:120px;
 		width:360px;
 		background-color:#C0C0C0;
 		border-bottom:solid #A0A0A0;
 		position:relative;
+		display:inline-block;
+	}
+	div.floor
+	{
+		
 	}
 	div.lift
 	{
@@ -72,12 +77,18 @@
 	  
 	  var buildingConfiguration = {
 		  lifts: [
-		  	{
-				liftAtFloor: 0, 
-				doorsOpen: true, 
-				noOfPeopleInLift: 1,
-				direction: "UP"
-		  	}
+	  	{
+			liftAtFloor: 0, 
+			doorsOpen: true, 
+			noOfPeopleInLift: 1,
+			direction: "UP"
+	  	},
+	  	{
+			liftAtFloor: 0, 
+			doorsOpen: true, 
+			noOfPeopleInLift: 1,
+			direction: "UP"
+	  	}
 		  ],
 		  floors: [
 			{peopleWaiting: 0},
@@ -115,17 +126,34 @@
 		  }
 	  });
 	  
-	  var Floor = React.createClass({
+	  var FloorSection = React.createClass({
 	    render: function() {
 			var peopleWaiting = new Array();
 			for(i=0; i<this.props.floor.peopleWaiting; i++){
 				peopleWaiting[i] = <Person position={i}/>
 			}
 	    	return (
-				<div className="floor">
+				<div className="floorSection">
 						{peopleWaiting}
 					<CallButton />
 					<Lift />
+					{this.props.floorNumber}
+				</div>
+			);
+	    }	
+	  });
+	  
+	  var Floor = React.createClass({
+	    render: function() {
+			var floorSections = new Array();
+			for(sectionNo=0; sectionNo<this.props.lifts.length; sectionNo++){
+				var floor = this.props.floor;
+				var floorNumber = this.props.floorNumber;
+				floorSections[sectionNo] = <FloorSection floor={floor} floorNumber={floorNumber}/>
+			}
+	    	return (
+				<div className="floor">
+					{floorSections}
 				</div>
 			);
 	    }	
@@ -133,13 +161,10 @@
 	  
 	  var Scene = React.createClass({
 	    render: function() {
-			var liftMap= {};
-			this.props.buildingConfiguration.lifts.map(function(lift){
-				liftMap[lift.liftAtFloor] = lift;
-			});
-			
+			var noOfFloors = this.props.buildingConfiguration.floors.length;
+			var lifts = this.props.buildingConfiguration.lifts;
 			var floors = this.props.buildingConfiguration.floors.map(function(floor, index){
-				return <Floor floor={floor} lift={liftMap[index]}/>
+				return <Floor floor={floor} floorNumber={noOfFloors - index -1} lifts={lifts}/>
 			});
 			
 	      return (
