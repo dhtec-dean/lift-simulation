@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Reactive Lift Simulation</title>
+    <script src="http://fb.me/react-0.9.0.js"></script>
+    <script src="http://fb.me/JSXTransformer-0.9.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+    <style>
+	div.floor
+	{
+		height:120px;
+		width:360px;
+		background-color:#C0C0C0;
+		border-bottom:solid #A0A0A0;
+		position:relative;
+	}
+	div.lift
+	{
+		position:absolute;
+		bottom:0px;
+		left:135px;
+		height:100px;
+		width:90px;
+		background-color:#A0A0A0;
+	}
+	div.callButton
+	{
+		position:absolute;
+		bottom:50px;
+		left:105px;
+		height:35px;
+		width:20px;
+		background-color:#A00000;
+	}
+	div.person
+	{
+		position:absolute; 
+		bottom:0px;
+		height:80px;
+		width:20px;
+		background-color:#FFFFCC;
+		z-index:1;
+	}
+	div.personPosition0
+	{
+		left:227px;
+	}
+	div.personPosition1
+	{
+		left:249px;
+	}
+	div.personPosition2
+	{
+		left:271px;
+	}
+	div.personPosition3
+	{
+		left:293px;
+	}
+	div.personPosition4
+	{
+		left:315px;
+	}
+    </style>
+  </head>
+  <body>
+    <div id="content"></div>
+    <script type="text/jsx">
+      /**
+       * @jsx React.DOM
+       */
+	  
+	  var buildingConfiguration = {
+		  lifts: [
+		  	{
+				liftAtFloor: 0, 
+				doorsOpen: true, 
+				noOfPeopleInLift: 1,
+				direction: "UP"
+		  	}
+		  ],
+		  floors: [
+			{peopleWaiting: 0},
+			{peopleWaiting: 2},
+			{peopleWaiting: 5}
+		  ]
+	  };
+	  
+	  var Person = React.createClass({
+		  render: function() {
+			  var className = "person personPosition" + this.props.position;
+			  return(
+				  <div className={className} /> 
+			  );
+		  }	  	
+	  });
+	  
+	  var Lift =  React.createClass({
+		  render: function() {
+			  return(
+				  <div className="lift">
+				  
+				  </div>
+			  );
+		  }
+	  });
+	  
+	  var CallButton = React.createClass({
+		  render: function() {
+			  return(
+				  <div className="callButton">
+				  
+				  </div>
+			  );
+		  }
+	  });
+	  
+	  var Floor = React.createClass({
+	    render: function() {
+			var peopleWaiting = new Array();
+			for(i=0; i<this.props.floor.peopleWaiting; i++){
+				peopleWaiting[i] = <Person position={i}/>
+			}
+	    	return (
+				<div className="floor">
+						{peopleWaiting}
+					<CallButton />
+					<Lift />
+				</div>
+			);
+	    }	
+	  });
+	  
+	  var Scene = React.createClass({
+	    render: function() {
+			var liftMap= {};
+			this.props.buildingConfiguration.lifts.map(function(lift){
+				liftMap[lift.liftAtFloor] = lift;
+			});
+			
+			var floors = this.props.buildingConfiguration.floors.map(function(floor, index){
+				return <Floor floor={floor} lift={liftMap[index]}/>
+			});
+			
+	      return (
+		      <div className="building">
+		        {floors}
+		      </div>
+	      );
+	    }
+	  });
+	  
+	  React.renderComponent(
+	    <Scene buildingConfiguration={buildingConfiguration}/>,
+	    document.getElementById('content')
+	  );
+	  
+    </script>
+</body>
+</html>
