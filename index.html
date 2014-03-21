@@ -28,6 +28,25 @@
 		width:90px;
 		background-color:#A0A0A0;
 	}
+	div.leftDoor
+	{
+		position:absolute;
+		bottom:0px;
+		left:135px;
+		height:100px;
+		width:45px;
+		background-color:#B0B0B0;
+	}
+	div.rightDoor
+	{
+		position:absolute;
+		bottom:0px;
+		left:180px;
+		height:100px;
+		width:45px;
+		background-color:#B0B0B0;
+		border-left:solid #A0A0A0;
+	}
 	div.liftDirectionIndicator
 	{
 		position:absolute;
@@ -65,25 +84,33 @@
 		background-color:#FFFFCC;
 		z-index:1;
 	}
-	div.personPosition0
+	div.personWaiting0
 	{
 		left:227px;
 	}
-	div.personPosition1
+	div.personWaiting1
 	{
 		left:249px;
 	}
-	div.personPosition2
+	div.personWaiting2
 	{
 		left:271px;
 	}
-	div.personPosition3
+	div.personWaiting3
 	{
 		left:293px;
 	}
-	div.personPosition4
+	div.personWaiting4
 	{
 		left:315px;
+	}
+	div.personInLift0
+	{
+		left:2px;
+	}
+	div.personInLift1
+	{
+		left:24px;
 	}
     </style>
   </head>
@@ -99,13 +126,13 @@
 	  	{
 			liftAtFloor: 0, 
 			doorsOpen: true, 
-			noOfPeopleInLift: [{goingTo: 1}],
+			peopleInLift: [{goingTo: 1}, {goingTo: 2}],
 			direction: "UP"
 	  	},
 	  	{
 			liftAtFloor: 2, 
 			doorsOpen: true, 
-			noOfPeopleInLift: [{goingTo: 0}],
+			peopleInLift: [{goingTo: 0}],
 			direction: "DOWN"
 	  	}
 		  ],
@@ -118,7 +145,7 @@
 	  
 	  var Person = React.createClass({
 		  render: function() {
-			  var className = "person personPosition" + this.props.position;
+			  var className = "person person" + this.props.waitingOrInLift + this.props.position;
 			  var goingTo = this.props.goingTo;
 			  return(
 				  <div className={className} >{goingTo}</div> 
@@ -128,11 +155,24 @@
 	  
 	  var Lift =  React.createClass({
 		  render: function() {
-			  return(
-				  <div className="lift">
-				  
-				  </div>
-			  );
+			  var peopleInLift = this.props.lift.peopleInLift.map(function(person, position){
+				return <Person position={position} goingTo={person.goingTo} waitingOrInLift="InLift" />
+			  });
+			  var liftIsAtThisFloor = (this.props.lift.liftAtFloor == this.props.floorNumber);
+			  if(liftIsAtThisFloor && this.props.lift.doorsOpen){
+				  return(
+					  <div className="lift">
+					  	{peopleInLift}
+					  </div>
+				  );
+			  } else {
+				  return(
+					  <div>
+					  	<div className="leftDoor" />
+						<div className="rightDoor" />
+					  </div>
+			  	);
+			  }
 		  }
 	  });
 	  
@@ -170,15 +210,16 @@
 	  var FloorSection = React.createClass({
 	    render: function() {
 			var people = this.props.peopleWaiting.map(function(person, position){
-				return <Person position={position} goingTo={person.goingTo} />
+				return <Person position={position} goingTo={person.goingTo} waitingOrInLift="Waiting" />
 			});
-			var lift = this.props.lift;
+			var liftAtFloor = this.props.lift.liftAtFloor;
+			var liftDirection = this.props.lift.direction;
 	    	return (
  				<div className="floorSection">
 					<CallButton />
-					<LiftDirectionIndicator direction={lift.direction}/>
-					<CurrentFloorIndicator currentFloor={lift.liftAtFloor}/>
-					<Lift lift={lift} />
+					<LiftDirectionIndicator direction={liftDirection}/>
+					<CurrentFloorIndicator currentFloor={liftAtFloor}/>
+					<Lift lift={this.props.lift} floorNumber={this.props.floorNumber} />
 					{people}
 					{this.props.floorNumber}
 				</div>
