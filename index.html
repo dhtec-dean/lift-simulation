@@ -65,15 +65,25 @@
 		height:15px;
 		background-color:#00A000;
 	}
-	
-	div.callButton
+	div.buttonPanel
 	{
 		position:absolute;
 		bottom:50px;
 		left:105px;
-		height:35px;
+		height:36px;
+		width:20px;
+	}
+	div.button
+	{
+		height:18px;
 		width:20px;
 		background-color:#A00000;
+	}
+	div.pressed
+	{
+		height:18px;
+		width:20px;
+		background-color:#FA0000;
 	}
 	div.person
 	{
@@ -178,9 +188,18 @@
 	  
 	  var CallButton = React.createClass({
 		  render: function() {
+			  var upButtonClass = "button"
+			  if(this.props.liftUpRequested){
+				  upButtonClass += " pressed"
+			  }
+			  var downButtonClass = "button"
+			  if(this.props.liftDownRequested){
+				  downButtonClass += " pressed"
+			  }
 			  return(
-				  <div className="callButton">
-				  
+				  <div className="buttonPanel">
+				  	<div className={upButtonClass} />
+				  	<div className={downButtonClass} />
 				  </div>
 			  );
 		  }
@@ -212,16 +231,24 @@
 			var people = this.props.peopleWaiting.map(function(person, position){
 				return <Person position={position} goingTo={person.goingTo} waitingOrInLift="Waiting" />
 			});
+			var floorNumber = this.props.floorNumber;
 			var liftAtFloor = this.props.lift.liftAtFloor;
 			var liftDirection = this.props.lift.direction;
+			var liftUpRequested = this.props.peopleWaiting.reduce(function(someoneIsGoingUp, person){
+				if(someoneIsGoingUp) return true;				
+				return person.goingTo > floorNumber;
+			}, false);
+			var liftDownRequested = this.props.peopleWaiting.reduce(function(someoneIsGoingDown, person){
+				if(someoneIsGoingDown) return true;				
+				return person.goingTo < floorNumber;
+			}, false);
 	    	return (
  				<div className="floorSection">
-					<CallButton />
-					<LiftDirectionIndicator direction={liftDirection}/>
-					<CurrentFloorIndicator currentFloor={liftAtFloor}/>
-					<Lift lift={this.props.lift} floorNumber={this.props.floorNumber} />
+					<CallButton liftUpRequested={liftUpRequested} liftDownRequested={liftDownRequested} />
+					<LiftDirectionIndicator direction={liftDirection} />
+					<CurrentFloorIndicator currentFloor={liftAtFloor} />
+					<Lift lift={this.props.lift} floorNumber={floorNumber} />
 					{people}
-					{this.props.floorNumber}
 				</div>
 			);
 	    }	
