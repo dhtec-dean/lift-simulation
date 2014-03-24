@@ -77,7 +77,7 @@
 	{
 		height:18px;
 		width:20px;
-		background-color:#A00000;
+		background-color:#700000;
 	}
 	div.pressed
 	{
@@ -234,14 +234,8 @@
 			var floorNumber = this.props.floorNumber;
 			var liftAtFloor = this.props.lift.liftAtFloor;
 			var liftDirection = this.props.lift.direction;
-			var liftUpRequested = this.props.peopleWaiting.reduce(function(someoneIsGoingUp, person){
-				if(someoneIsGoingUp) return true;				
-				return person.goingTo > floorNumber;
-			}, false);
-			var liftDownRequested = this.props.peopleWaiting.reduce(function(someoneIsGoingDown, person){
-				if(someoneIsGoingDown) return true;				
-				return person.goingTo < floorNumber;
-			}, false);
+			var liftUpRequested = this.props.liftUpRequested;
+			var liftDownRequested = this.props.liftDownRequested;
 	    	return (
  				<div className="floorSection">
 					<CallButton liftUpRequested={liftUpRequested} liftDownRequested={liftDownRequested} />
@@ -263,6 +257,14 @@
 			var maxNoOfPeoplePerSection = 3;
 			for(sectionNo=0; sectionNo< noOfSectionsPerFloor; sectionNo++){
 				var floorNumber = this.props.floorNumber;
+				var liftUpRequested = this.props.peopleWaiting.reduce(function(someoneIsGoingUp, person){
+					if(someoneIsGoingUp) return true;				
+					return person.goingTo > floorNumber;
+				}, false);
+				var liftDownRequested = this.props.peopleWaiting.reduce(function(someoneIsGoingDown, person){
+					if(someoneIsGoingDown) return true;				
+					return person.goingTo < floorNumber;
+				}, false);
 				var peopleWaiting = new Array();
 				var startTakingPeopleFrom = sectionNo * maxNoOfPeoplePerSection;
 				var takePeopleUntil = startTakingPeopleFrom + maxNoOfPeoplePerSection;
@@ -272,7 +274,7 @@
 					peopleWaiting[peopleWaitingPosition] = this.props.peopleWaiting[personAt];
 					peopleWaitingPosition++;
 				}
-				floorSections[sectionNo] = <FloorSection peopleWaiting={peopleWaiting} floorNumber={floorNumber} lift={lift}/>
+				floorSections[sectionNo] = <FloorSection peopleWaiting={peopleWaiting} floorNumber={floorNumber} lift={lift} liftUpRequested={liftUpRequested} liftDownRequested={liftDownRequested} />
 			}
 	    	return (
 				<div className="floor">
