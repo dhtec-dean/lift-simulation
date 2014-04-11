@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Reactive Lift Simulation</title>
-    <script src="http://fb.me/react-0.9.0.js"></script>
-    <script src="http://fb.me/JSXTransformer-0.9.0.js"></script>
-    <script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
     <style>
 	div.floor
 	{
@@ -120,8 +116,27 @@
 		left:24px;
 	}
     </style>
+    <script src="http://fb.me/react-0.9.0.js"></script>
+    <script src="http://fb.me/JSXTransformer-0.9.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+   <!-- <script>
+      function init() 
+
+        var Socket = "MozWebSocket" in window ? MozWebSocket : WebSocket;
+        var ws = new Socket("ws://localhost:8080/foo/bar?hello=world");
+        ws.onmessage = function(evt) { 
+			console.log("Received: " + evt.data); 
+		};
+        ws.onclose = function(event) {        };
+        ws.onopen = function() {
+          ws.send("getBuilding");
+        };
+      };
+    </script> -->
+    <title>Reactive Lift Simulation</title>
   </head>
   <body>
+  <!--<body onload="init();">-->
     <div id="content"></div>
     <script type="text/jsx">
       /**
@@ -130,22 +145,21 @@
 	  
 	  var buildingConfiguration = {
 		  lifts: [
-	  	{
-			liftAtFloor: 0, 
-			doorsOpen: true, 
-			peopleInLift: [{goingTo: 1}, {goingTo: 2}],
-			direction: "UP"
-	  	},
-	  	{
-			liftAtFloor: 2, 
-			doorsOpen: true, 
-			peopleInLift: [{goingTo: 0}],
-			direction: "DOWN"
-	  	}
+  	  	{
+  			liftAtFloor: 0, 
+  			doorsOpen: true, 
+  			peopleInLift: [{goingTo: 1}, {goingTo: 2}],
+  			direction: "UP"
+  	  	},{
+    			liftAtFloor: 0, 
+    			doorsOpen: true, 
+    			peopleInLift: [{goingTo: 1}, {goingTo: 2}],
+    			direction: "UP"
+    	  	}
 		  ],
 		  floors: [
-			{peopleWaiting: []},
 			{peopleWaiting: [{goingTo: 0}]},
+			{peopleWaiting: []},
 			{peopleWaiting: [{goingTo: 1}, {goingTo: 2}]}
 		  ]
 	  };
@@ -282,10 +296,48 @@
 	  });
 	  
 	  var Scene = React.createClass({
+		  getInitialState: function() {
+			  return {
+		  		lifts: [],
+		  	  	floors: []
+	  	  	  };
+		  },
+		  componentWillMount: function() {
+        var Socket = "MozWebSocket" in window ? MozWebSocket : WebSocket;
+        var ws = new Socket("ws://localhost:8080/foo/bar?hello=world");
+
+		console.log(this);
+		var react = this;
+        ws.onmessage = function(evt) { 
+			console.log("Received: " + evt.data); 
+
+/*
+			
+			WORKS: 
+						
+			console.log("this: " + this.toString());
+			react.setState(JSON.parse('{"lifts": [{"liftAtFloor": 0, "doorsOpen": true, "peopleInLift": [{"goingTo": 1}, {"goingTo": 2}],"direction": "UP"},{"liftAtFloor": 0, "doorsOpen": true, "peopleInLift": [{"goingTo": 1}, {"goingTo": 2}],"direction": "UP"}],"floors": [{"peopleWaiting": [{"goingTo": 0}]},{"peopleWaiting": []},{"peopleWaiting": [{"goingTo": 1}, {"goingTo": 2}]}]}'));
+				  
+*/
+			
+			
+			react.setState(JSON.parse(  evt.data));
+		};
+        ws.onclose = function(event) {        };
+        ws.onopen = function() {
+          ws.send("getBuilding");
+        };
+		
+		          return {
+		              filterText: '',
+		              inStockOnly: false
+		          };
+		      },
+		  
 	    render: function() {
-			var noOfFloors = this.props.buildingConfiguration.floors.length;
-			var lifts = this.props.buildingConfiguration.lifts;
-			var floors = this.props.buildingConfiguration.floors.map(function(floor, index){
+			var noOfFloors = this.state.floors.length;
+			var lifts = this.state.lifts;
+			var floors = this.state.floors.map(function(floor, index){
 				return <Floor peopleWaiting={floor.peopleWaiting} floorNumber={noOfFloors - index -1} lifts={lifts}/>
 			});
 			
