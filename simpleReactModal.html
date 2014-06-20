@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://code.jquery.com/jquery.min.js"></script>
+<link href="http://getbootstrap.com/dist/css/bootstrap.css" rel="stylesheet" type="text/css" />
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script src="http://getbootstrap.com/dist/js/bootstrap.js"></script>
+  
+    <script src="http://fb.me/react-0.4.1.js"></script>
+    <script src="http://fb.me/JSXTransformer-0.4.1.js"></script>
+<meta charset=utf-8 />
+<title>Modal example</title>
+<style>
+div.aButton {
+	height:120px;
+	width:360px;
+	background-color:#C0C0C0;
+}
+</style>
+</head>
+<body>
+  <div id="jqueryexample"></div>
+  <script type="text/jsx">/** @jsx React.DOM */
+
+// Simple pure-React component so we don't have to remember
+// Bootstrap's classes
+var BootstrapButton = React.createClass({
+  render: function() {
+    // transferPropsTo() is smart enough to merge classes provided
+    // to this component.
+    return this.transferPropsTo(
+      <div href="javascript:;" role="button" className="btn">
+        {this.props.children}
+      </div>
+    );
+  }
+});
+
+var BootstrapModal = React.createClass({
+  // The following two methods are the only places we need to
+  // integrate with Bootstrap or jQuery!
+  componentDidMount: function() {
+    // When the component is added, turn it into a modal
+    $(this.getDOMNode())
+      .modal({backdrop: true, keyboard: true, show: false})
+  },
+	    componentWillUnmount: function() {
+	      $(this.getDOMNode()).off('hidden', this.handleHidden);
+	    },
+  close: function() {
+    $(this.getDOMNode()).modal('hide');
+  },
+  open: function() {
+    $(this.getDOMNode()).modal('show');
+  },
+  handleConfirm: function() {
+    if (this.props.onConfirm) {
+      this.props.onConfirm();
+    }
+  },
+	    handleCancel: function() {
+	      if (this.props.onCancel) {
+	        this.props.onCancel();
+	      }
+	    },
+  render: function() {
+    var confirmButton = null;
+
+    if (this.props.confirm) {
+      confirmButton = (
+        <BootstrapButton
+          onClick={this.handleConfirm}
+          className="btn-primary">
+          {this.props.confirm}
+        </BootstrapButton>
+      );
+    }
+
+    return (
+      <div className="modal fade">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+    			<div className="modal-header">
+		            <button
+		              type="button"
+		              className="close"
+		              onClick={this.handleCancel}
+		              dangerouslySetInnerHTML={{__html: '&times'}}
+		            />
+					<h3>{this.props.title}</h3>
+				</div>
+				<div className="modal-body">
+					{this.props.children}
+				</div>
+				<div className="modal-footer">
+					{confirmButton}
+				</div>
+			</div>
+		</div>
+      </div>
+    );
+  }
+});
+
+var Example = React.createClass({
+  openModal: function() {
+    this.refs.modal.open();
+  },
+  closeModal: function() {
+    this.refs.modal.close();
+  },
+  render: function() {
+	  var noOfFloors = 4;
+	  var thisFloor = 2;
+	  var floorButtons = Array();
+	  for (var i=noOfFloors; i>0; i--){
+		  floorButtons[noOfFloors-i] = 
+        <BootstrapButton
+          onClick={this.handleConfirm}
+          className="btn-primary">
+          {i}
+        </BootstrapButton>
+	  }
+	  
+    var modal = (
+      <BootstrapModal
+        ref="modal"
+        confirm="Confirm"
+        onConfirm={this.closeModal}
+        onCancel={this.closeModal}
+        title="Hello, Bootstrap!">
+          This is a React component powered by jQuery and Bootstrap!
+		  {floorButtons}
+      </BootstrapModal>
+    );
+    return (
+      <div className="example">
+        {modal}
+        <BootstrapButton onClick={this.openModal} class="aButton">Open modal</BootstrapButton>
+      </div>
+    );
+  }
+});
+
+React.renderComponent(<Example />, document.getElementById('jqueryexample'));</script>
+</body>
+</html>
